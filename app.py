@@ -11,6 +11,7 @@ To run:
     streamlit run app.py
 """
 
+import os
 import pickle
 
 import pandas as pd
@@ -50,10 +51,12 @@ def load_artifacts():
     with open(FEATURE_COLS_FILE, "rb") as f:
         feature_cols = pickle.load(f)
     # Load all models
+    # Load the models that exist (run analysis.py to create any missing ones)
     models_dict = {}
     for name, path in MODEL_FILES.items():
-        with open(path, "rb") as f:
-            models_dict[name] = pickle.load(f)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                models_dict[name] = pickle.load(f)
     return scaler, feature_cols, models_dict
 
 raw_df = load_raw_data()
@@ -127,7 +130,7 @@ st.sidebar.header("Input Features")
 
 selected_model_name = st.sidebar.selectbox(
     "Select model to use for prediction",
-    list(MODEL_FILES.keys())
+    list(models_dict.keys())
 )
 model = models_dict[selected_model_name]
 age = st.sidebar.slider(
